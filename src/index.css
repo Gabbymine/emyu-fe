@@ -5,6 +5,34 @@
   font-family: "Satoshi", sans-serif;
 }
 
+/* Color Scheme */
+:root {
+  --primary: #991B1B;
+  --primary-dark: #7A0F0F;
+  --primary-light: #C41E1E;
+  --accent: #FFD4A3;
+  --accent-light: #FFF9F3;
+  --text-light: #F8F6EF;
+  --bg-gradient-1: #991B1B;
+  --bg-gradient-2: #8B1818;
+  --bg-gradient-3: #6B0F0F;
+  --card-bg: rgba(255, 248, 243, 0.95);
+  --card-border: rgba(255, 212, 163, 0.2);
+}
+
+/* Modern Glass effect */
+.glass-effect {
+  background: rgba(248, 246, 239, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(248, 246, 239, 0.2);
+}
+
+.glass-effect-dark {
+  background: rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 248, 243, 0.15);
+}
+
 /* Fade In Animation for Sections */
 @keyframes fadeInSection {
   from {
@@ -35,6 +63,81 @@
   }
 }
 
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-slideUp {
+  animation: slideUp 0.5s ease-out forwards;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(255, 212, 163, 0.6), rgba(255, 212, 163, 0.4));
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(255, 212, 163, 0.8), rgba(255, 212, 163, 0.6));
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* Input Focus Styles */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+}
+
+/* Smooth Transitions */
+button,
+a {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Loading State */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }

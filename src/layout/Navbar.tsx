@@ -1,11 +1,22 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import { Menu, X, ShoppingBag } from "lucide-react";
+import { Menu, X, ShoppingBag, LogOut } from "lucide-react";
+import { useAuthStore } from "../store/authStore";
+import { useCartStore } from "../store/cartStore";
 
 export default function Navbar() {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { isAuthenticated, user, logout } = useAuthStore();
+  const { items: cartItems } = useCartStore();
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    setCartCount(cartItems.length);
+  }, [cartItems]);
 
   useEffect(() => {
     AOS.init({ duration: 800, easing: "ease-out-cubic" });
@@ -27,49 +38,100 @@ export default function Navbar() {
     { label: "Join Us", href: "#form" },
   ];
 
+  const handleShopNow = () => {
+    if (isAuthenticated) {
+      navigate("/shop");
+    } else {
+      navigate("/login");
+    }
+    setOpen(false);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+    setOpen(false);
+  };
+
   return (
     <nav
       data-aos="fade-down"
-      className={`w-full px-6 md:px-12 py-4 md:py-5 flex justify-between items-center text-white sticky top-0 z-40 transition duration-300 ${
+      className={`w-full px-6 md:px-12 py-3 md:py-4 flex justify-between items-center text-white sticky top-0 z-40 transition duration-300 ${
         scrolled
-          ? "bg-[#991B1B]/95 backdrop-blur-md shadow-2xl"
-          : "bg-[#991B1B] shadow-lg"
+          ? "bg-[#991B1B]/90 backdrop-blur-xl shadow-lg border-b border-[#FFD4A3]/10"
+          : "bg-[#991B1B]/85 backdrop-blur-sm"
       }`}
     >
       {/* Logo & Brand */}
-      <div className="flex items-center gap-3 group cursor-pointer">
-        <img 
-          src="img/logo.png" 
-          alt="Redsphere Logo" 
-          className="w-16 sm:w-20 h-auto group-hover:scale-110 transition duration-300" 
-        />
+      <div 
+        className="flex items-center gap-3 group cursor-pointer hover:scale-105 transition duration-300"
+        onClick={() => navigate("/")}
+      >
+        <div className="relative">
+          <div className="absolute inset-0 bg-[#FFD4A3]/20 rounded-lg blur-lg group-hover:blur-xl transition duration-300"></div>
+          <img 
+            src="img/logo.png" 
+            alt="Redsphere Logo" 
+            className="w-14 sm:w-16 h-auto relative z-10 group-hover:scale-110 transition duration-300" 
+          />
+        </div>
         <div>
-          <h1 className="font-black text-lg md:text-xl tracking-wide">Redsphere</h1>
-          <p className="text-xs text-[#FFF9F3]/70 font-semibold">Manchester United</p>
+          <h1 className="font-black text-lg md:text-xl tracking-wider">Redsphere</h1>
+          <p className="text-xs text-[#FFD4A3]/70 font-semibold tracking-widest uppercase">Manchester United</p>
         </div>
       </div>
 
       {/* Desktop menu */}
-      <ul className="hidden lg:flex items-center gap-8 font-semibold text-sm md:text-base">
+      <ul className="hidden lg:flex items-center gap-6 font-medium text-sm">
         {navLinks.map((link) => (
           <a
             key={link.href}
             href={link.href}
-            className="relative hover:text-[#FFD4A3] transition duration-200 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-[#FFD4A3] after:transition-all after:duration-300 hover:after:w-full"
+            className="relative py-2 px-1 group hover:text-[#FFD4A3] transition duration-200"
           >
             {link.label}
+            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-[#FFD4A3] to-[#FFF9F3] rounded-full group-hover:w-full transition-all duration-300"></span>
           </a>
         ))}
       </ul>
 
       {/* Desktop CTA */}
-      <div className="hidden md:flex items-center gap-4">
-        <button className="p-3 bg-white/10 hover:bg-white/20 rounded-lg transition duration-200">
-          <ShoppingBag size={20} />
+      <div className="hidden md:flex items-center gap-3">
+        <button 
+          onClick={() => navigate("/cart")}
+          className="p-2 bg-white/10 hover:bg-[#FFD4A3]/20 rounded-lg transition duration-200 relative group hover:scale-110"
+        >
+          <ShoppingBag size={18} className="text-[#FFD4A3] group-hover:text-[#FFF9F3] transition" />
+          {cartCount > 0 && (
+            <span className="absolute -top-2 -right-2 bg-gradient-to-br from-[#FFD4A3] to-[#FFB380] text-[#991B1B] text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg">
+              {cartCount}
+            </span>
+          )}
         </button>
-        <button className="px-6 py-2 bg-[#FFF9F3] text-[#991B1B] font-bold rounded-lg hover:bg-[#FFD4A3] transition duration-200 text-sm">
-          Shop Now
-        </button>
+        
+        {isAuthenticated ? (
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium px-2 py-1 rounded-lg bg-white/10 hidden sm:inline">{user?.name}</span>
+            <button
+              onClick={() => {
+                logout();
+                navigate("/");
+                setOpen(false);
+              }}
+              className="px-4 py-2 bg-red-600/80 hover:bg-red-700 text-white font-semibold rounded-lg transition duration-200 text-xs flex items-center gap-1 hover:scale-105"
+            >
+              <LogOut size={14} />
+              <span className="hidden sm:inline">Logout</span>
+            </button>
+          </div>
+        ) : (
+          <button 
+            onClick={handleShopNow}
+            className="px-4 py-2 bg-gradient-to-r from-[#FFF9F3] to-[#FFD4A3] text-[#991B1B] font-semibold rounded-lg hover:shadow-lg transition duration-200 text-xs hover:scale-105 shadow-md"
+          >
+            Shop Now
+          </button>
+        )}
       </div>
 
       {/* Mobile Menu Button */}
@@ -124,10 +186,40 @@ export default function Navbar() {
             </ul>
 
             {/* Footer */}
-            <div className="pt-4 border-t border-gray-200">
-              <button className="w-full px-4 py-3 bg-[#991B1B] text-white font-bold rounded-lg hover:bg-[#7A0F0F] transition">
-                Shop Now
-              </button>
+            <div className="pt-4 border-t border-gray-200 space-y-3">
+              {isAuthenticated && cartCount > 0 && (
+                <button
+                  onClick={() => {
+                    navigate("/cart");
+                    setOpen(false);
+                  }}
+                  className="w-full px-4 py-3 bg-[#FFD4A3] text-[#991B1B] font-bold rounded-lg hover:bg-[#FFF9F3] transition flex items-center justify-center gap-2"
+                >
+                  <ShoppingBag size={16} />
+                  View Cart ({cartCount})
+                </button>
+              )}
+              {isAuthenticated ? (
+                <div className="space-y-3">
+                  <p className="text-gray-800 font-semibold text-sm">
+                    Logged in as: {user?.name}
+                  </p>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full px-4 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition flex items-center justify-center gap-2"
+                  >
+                    <LogOut size={16} />
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={handleShopNow}
+                  className="w-full px-4 py-3 bg-[#991B1B] text-white font-bold rounded-lg hover:bg-[#7A0F0F] transition"
+                >
+                  Shop Now
+                </button>
+              )}
               <p className="text-center text-xs text-gray-600 font-medium mt-3">
                 © 2025 Redsphere
               </p>
