@@ -25,7 +25,7 @@ export default function Navbar() {
         <a href="#story" className="hover:text-gray-300 transition">
           Our Story
         </a>
-        <a href="#" className="hover:text-gray-300 transition">
+        <a href="#product" className="hover:text-gray-300 transition">
           Product
         </a>
         <a href="#" className="hover:text-gray-300 transition">
@@ -80,7 +80,7 @@ export default function Navbar() {
               </li>
               <li>
                 <a
-                  href="#"
+                  href="#product"
                   className="flex items-center py-3 px-4 text-gray-700 hover:bg-red-500 hover:text-white rounded-xl transition-all duration-200 font-medium group"
                   onClick={() => setOpen(false)}
                 >
