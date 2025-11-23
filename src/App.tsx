@@ -3,6 +3,7 @@ import Hero from "./components/Hero";
 import Mission from "./components/Mission";
 import Navbar from "./components/Navbar";
 import Story from "./components/Story";
+import Form from "./components/Form";
 import Footer from "./components/Footer";
 import Review from "./components/Review";
 
@@ -15,6 +16,7 @@ function App() {
   <Mission/>
   <Collection/>
   <Review/>
+  <Form/>
   <Footer/>
   </div>;
 }

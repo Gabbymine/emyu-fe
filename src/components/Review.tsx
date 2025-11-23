@@ -15,13 +15,13 @@ export default function Review() {
     },
     {
       text: "“Kualitas jaketnya premium parah. Materialnya tebel tapi nggak bikin gerah. Resleting halus, bordirannya detail, dan warnanya tegas. Berasa pakai brand internasional.”",
-      name: "Keysa",
-      city: "Jakarta",
+      name: "Mitaa",
+      city: "Depok",
     },
     {
       text: "“Detail kecilnya bikin jatuh cinta. Logo embossed, stitching rapi, dan warna merahnya solid banget. Kelihatan ori, berkelas, dan tahan lama.”",
-      name: "Aryo",
-      city: "Depok",
+      name: "Fatih",
+      city: "Jakarta",
     },
     {
       text: "“Detail kecilnya bikin jatuh cinta. Logo embossed, stitching rapi, dan warna merahnya solid banget. Kelihatan ori, berkelas, dan tahan lama.”",
@@ -85,41 +85,52 @@ export default function Review() {
             </p>
           </div>
         ))}
-      </div>
+      </div><br />
+      <br />
 
       {/* Rating Card */}
       <div
         className="
-        bg-[#991B1B] 
-        text-white 
-        mt-12 
-        w-full 
-        max-w-[330px] 
-        rounded-2xl 
-        py-6 
-        px-6 
-        text-center 
-        shadow-xl 
-        "
+    w-full 
+    max-w-[520px]
+    bg-gradient-to-r from-[#991B1B] to-[#7A0F0F]
+    text-white
+    rounded-3xl
+    py-8 px-10
+    flex flex-col md:flex-row
+    items-center justify-between
+    shadow-xl
+  "
         data-aos="zoom-in"
       >
-        <p className="text-4xl font-bold leading-none">5.0</p>
+        {/* LEFT SIDE */}
+        <div className="flex flex-col items-center text-center md:items-start md:text-left">
+          <p className="text-5xl font-semibold">4.9</p>
 
-        <div className="flex justify-center gap-1 my-1">
-          {Array(5)
-            .fill(0)
-            .map((_, i) => (
-              <span key={i} className="text-white text-xl">
-                ★
-              </span>
-            ))}
+          <div className="flex gap-1 my-2">
+            {Array(5)
+              .fill(0)
+              .map((_, i) => (
+                <span key={i} className="text-white text-2xl">
+                  ★
+                </span>
+              ))}
+          </div>
+
+          <p className="text-sm opacity-90 mt-1">Based on 2000+ reviews</p>
         </div>
 
-        <p className="text-sm opacity-90 -mt-1">Based on 2000+ reviews</p>
-        <p className="text-3xl font-bold leading-none">98%</p>
-        <p className="text-sm opacity-90">Customer Satisfaction</p>
+        {/* DIVIDER */}
+        <div className="hidden md:block h-[70px] w-[2px] bg-white/30 mx-10"></div>
 
-        <div className="w-full w-[4px] bg-white/30 my-6"></div>
+        {/* MOBILE DIVIDER */}
+        <div className="md:hidden w-[80%] h-[2px] bg-white/30 my-6"></div>
+
+        {/* RIGHT SIDE */}
+        <div className="flex flex-col items-center text-center md:items-start md:text-left">
+          <p className="text-5xl font-semibold">98%</p>
+          <p className="text-sm opacity-90 mt-2">Customer Satisfaction</p>
+        </div>
       </div>
     </section>
   );
