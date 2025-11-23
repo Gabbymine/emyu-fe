@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import { Menu, X, ShoppingBag, LogOut } from "lucide-react";
+import { Menu, X, ShoppingBag, LogOut, ChevronDown, User } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { useCartStore } from "../store/cartStore";
 
 export default function Navbar() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { isAuthenticated, user, logout } = useAuthStore();
   const { items: cartItems } = useCartStore();
@@ -29,6 +30,20 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const profileBtn = (e.target as HTMLElement).closest('[data-profile-button]');
+      const profileDropdown = (e.target as HTMLElement).closest('[data-profile-dropdown]');
+      
+      if (!profileBtn && !profileDropdown && profileOpen) {
+        setProfileOpen(false);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [profileOpen]);
 
   const navLinks = [
     { label: "Our Story", href: "#story" },
@@ -110,19 +125,68 @@ export default function Navbar() {
         </button>
         
         {isAuthenticated ? (
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium px-2 py-1 rounded-lg bg-white/10 hidden sm:inline">{user?.name}</span>
+          <div className="relative">
             <button
-              onClick={() => {
-                logout();
-                navigate("/");
-                setOpen(false);
-              }}
-              className="px-4 py-2 bg-red-600/80 hover:bg-red-700 text-white font-semibold rounded-lg transition duration-200 text-xs flex items-center gap-1 hover:scale-105"
+              onClick={() => setProfileOpen(!profileOpen)}
+              data-profile-button
+              className="flex items-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/15 rounded-lg transition duration-200 group"
             >
-              <LogOut size={14} />
-              <span className="hidden sm:inline">Logout</span>
+              <div className="w-8 h-8 bg-gradient-to-br from-[#FFD4A3] to-[#FFB380] rounded-full flex items-center justify-center text-[#991B1B] font-bold text-sm">
+                {user?.name?.charAt(0).toUpperCase() || "U"}
+              </div>
+              <ChevronDown size={16} className="text-white/60 group-hover:text-white transition" />
             </button>
+
+            {/* Profile Dropdown */}
+            {profileOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-white/20 overflow-hidden z-50" data-profile-dropdown>
+                <div className="px-4 py-3 border-b border-gray-200">
+                  <p className="text-sm text-gray-800 font-semibold">{user?.name}</p>
+                  <p className="text-xs text-gray-600">{user?.email}</p>
+                </div>
+                
+                <button
+                  onClick={() => {
+                    navigate("/profile");
+                    setProfileOpen(false);
+                  }}
+                  className="w-full px-4 py-2 text-left text-gray-800 hover:bg-[#991B1B] hover:text-white transition flex items-center gap-2 text-sm"
+                >
+                  <User size={16} />
+                  My Profile
+                </button>
+                
+                <button
+                  onClick={() => {
+                    navigate("/cart");
+                    setProfileOpen(false);
+                  }}
+                  className="w-full px-4 py-2 text-left text-gray-800 hover:bg-[#991B1B] hover:text-white transition flex items-center gap-2 text-sm relative"
+                >
+                  <ShoppingBag size={16} />
+                  <span>My Cart</span>
+                  {cartCount > 0 && (
+                    <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {cartCount}
+                    </span>
+                  )}
+                </button>
+                
+                <div className="border-t border-gray-200">
+                  <button
+                    onClick={() => {
+                      logout();
+                      navigate("/");
+                      setProfileOpen(false);
+                    }}
+                    className="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50 transition flex items-center gap-2 text-sm font-semibold"
+                  >
+                    <LogOut size={16} />
+                    Logout
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <button 

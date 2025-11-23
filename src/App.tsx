@@ -14,6 +14,7 @@ import ShopPage from "./features/product/pages/ShopPage";
 import CartPage from "./features/cart/pages/CartPage";
 import CheckoutPage from "./features/order/pages/CheckoutPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AuthPage from "./features/auth/pages/AuthPage";
 
 function AppContent() {
   return (
@@ -29,6 +30,9 @@ function AppContent() {
           </div>
         }
       />
+
+      <Route path="/login" element={<AuthPage />} />
+      <Route path="/register" element={<AuthPage />} />
 
       {/* Protected Routes */}
       <Route
