@@ -57,7 +57,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl overflow-hidden shadow-sm">
-              <img src="/img/logo.png" alt="Redsphere Logo" className="w-full h-full object-cover" />
+              <img src="/img/logo.png" alt="Redsphere Logo" className="w-full h-full object-cover invert" />
             </div>
             {sidebarOpen && (
               <div>

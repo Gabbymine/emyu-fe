@@ -392,6 +392,136 @@ export default function AdminDashboard() {
             <p className="text-sm text-purple-600 mt-2">Per transaction</p>
           </div>
         </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Order Status Distribution */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center">
+                <BarChart3 size={20} className="text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Order Status</h3>
+                <p className="text-sm text-gray-500">Distribution of orders by status</p>
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="h-64 bg-gray-50 rounded-lg animate-pulse" />
+            ) : (
+              <div className="space-y-4">
+                {[
+                  { name: "Completed", value: stats.completedOrders, color: "#10b981" },
+                  { name: "Pending", value: stats.pendingOrders, color: "#3b82f6" },
+                  { name: "Shipped", value: stats.shippedOrders, color: "#06b6d4" },
+                  { name: "Cancelled", value: stats.cancelledOrders, color: "#ef4444" },
+                ].map((item) => {
+                  const total = stats.totalOrders || 1;
+                  const percentage = (item.value / total) * 100;
+                  return (
+                    <div key={item.name} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: item.color }}
+                          ></div>
+                          <span className="font-semibold text-gray-900">{item.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-gray-900">{item.value}</span>
+                          <span className="text-sm text-gray-500">{percentage.toFixed(1)}%</span>
+                        </div>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="h-full transition-all duration-500 rounded-full"
+                          style={{
+                            backgroundColor: item.color,
+                            width: `${percentage}%`,
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Revenue Overview */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
+                <BarChart3 size={20} className="text-green-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Revenue Overview</h3>
+                <p className="text-sm text-gray-500">Total revenue and average value</p>
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="h-64 bg-gray-50 rounded-lg animate-pulse" />
+            ) : (
+              <div className="space-y-6">
+                {/* Total Revenue Bar */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-gray-900">Total Revenue</span>
+                    <span className="font-bold text-green-600 text-lg">
+                      Rp{(stats.totalRevenue / 1000000).toFixed(1)}M
+                    </span>
+                  </div>
+                  <div className="h-3 w-full bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-green-500 to-emerald-600 transition-all duration-500"
+                      style={{ width: "100%" }}
+                    ></div>
+                  </div>
+                </div>
+
+                {/* Average Order Value */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-gray-900">Average Order Value</span>
+                    <span className="font-bold text-blue-600 text-lg">
+                      Rp{(stats.averageOrderValue / 1000).toFixed(0)}k
+                    </span>
+                  </div>
+                  <div className="h-3 w-full bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-blue-500 to-cyan-600 transition-all duration-500"
+                      style={{
+                        width: `${Math.min(
+                          (stats.averageOrderValue / (stats.totalRevenue / stats.totalOrders || 1)) * 100,
+                          100
+                        )}%`,
+                      }}
+                    ></div>
+                  </div>
+                </div>
+
+                {/* Revenue per Customer */}
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-100">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 font-medium">Revenue per Customer</p>
+                      <p className="text-2xl font-bold text-purple-600 mt-1">
+                        Rp{stats.totalUsers > 0 ? (stats.totalRevenue / stats.totalUsers / 1000).toFixed(0) : 0}k
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-600">Orders</p>
+                      <p className="text-2xl font-bold text-gray-900">{stats.totalOrders}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </AdminLayout>
   );

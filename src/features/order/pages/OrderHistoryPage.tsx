@@ -244,7 +244,7 @@ export default function OrderHistoryPage() {
                       </div>
                       <ChevronDown
                         size={24}
-                        className={`text-red-600 transition-transform flex-shrink-0 ${
+                        className={`text-red-600 transition-transform duration-300 ease-in-out flex-shrink-0 ${
                           expandedOrder === order.id ? "rotate-180" : ""
                         }`}
                       />
@@ -253,11 +253,19 @@ export default function OrderHistoryPage() {
                 </button>
 
                 {/* Order Details */}
-                {expandedOrder === order.id && (
-                  <div className="px-6 pb-6 border-t-2 border-red-100 bg-gradient-to-br from-white to-red-50">
+                <div 
+                  className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                    expandedOrder === order.id ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+                  }`}
+                >
+                  <div className={`px-6 pb-6 border-t-2 border-red-100 bg-gradient-to-br from-white to-red-50 transform transition-all duration-300 ${
+                    expandedOrder === order.id ? 'translate-y-0' : '-translate-y-4'
+                  }`}>
                     <div className="grid md:grid-cols-2 gap-8 mt-6">
                       {/* Shipping Address */}
-                      <div>
+                      <div className={`transform transition-all duration-500 delay-75 ${
+                        expandedOrder === order.id ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'
+                      }`}>
                         <h3 className="flex items-center gap-3 font-bold text-lg mb-4 text-gray-900">
                           <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
                             <MapPin size={20} className="text-red-600" />
@@ -275,7 +283,9 @@ export default function OrderHistoryPage() {
                       </div>
 
                       {/* Price Summary */}
-                      <div>
+                      <div className={`transform transition-all duration-500 delay-100 ${
+                        expandedOrder === order.id ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'
+                      }`}>
                         <h3 className="flex items-center gap-3 font-bold text-lg mb-4 text-gray-900">
                           <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
                             <DollarSign size={20} className="text-red-600" />
@@ -306,7 +316,9 @@ export default function OrderHistoryPage() {
                     </div>
 
                     {/* Items */}
-                    <div className="mt-8">
+                    <div className={`mt-8 transform transition-all duration-500 delay-150 ${
+                      expandedOrder === order.id ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+                    }`}>
                       <h3 className="flex items-center gap-3 font-bold text-lg mb-4 text-gray-900">
                         <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
                           <Package size={20} className="text-red-600" />
@@ -314,10 +326,17 @@ export default function OrderHistoryPage() {
                         Produk Pesanan
                       </h3>
                       <div className="space-y-3">
-                        {order.items.map((item) => (
+                        {order.items.map((item, index) => (
                           <div
                             key={item.id}
-                            className="flex justify-between items-center bg-white rounded-lg p-4 border-2 border-red-100"
+                            className={`flex justify-between items-center bg-white rounded-lg p-4 border-2 border-red-100 transform transition-all duration-300 ${
+                              expandedOrder === order.id 
+                                ? 'translate-x-0 opacity-100' 
+                                : 'translate-x-4 opacity-0'
+                            }`}
+                            style={{ 
+                              transitionDelay: expandedOrder === order.id ? `${200 + index * 50}ms` : '0ms' 
+                            }}
                           >
                             <div className="flex-1">
                               <p className="font-semibold text-gray-900">{item.name}</p>
@@ -333,7 +352,7 @@ export default function OrderHistoryPage() {
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             ))}
           </div>

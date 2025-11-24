@@ -1,7 +1,9 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { ArrowRight } from "lucide-react";
+import { useAuthStore } from "../../../store/authStore";
 
 interface CollectionItem {
   id: number;
@@ -20,9 +22,20 @@ const COLLECTION_ITEMS: CollectionItem[] = [
 ];
 
 export default function CollectionSection() {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
+
   useEffect(() => {
     AOS.init({ duration: 1000, once: true });
   }, []);
+
+  const handleExploreCollection = () => {
+    if (isAuthenticated) {
+      navigate("/shop");
+    } else {
+      navigate("/login");
+    }
+  };
 
   return (
     <section id="product" className="w-full bg-white py-20 md:py-28 px-6 md:px-12 opacity-0 animate-fade-in" style={{ animationDelay: '300ms' }}>
@@ -67,7 +80,16 @@ export default function CollectionSection() {
                   {/* Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex items-end">
                     <div className="w-full p-6">
-                      <button className="w-full bg-white text-[#991B1B] font-bold py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-[#FFD4A3] transition">
+                      <button 
+                        onClick={() => {
+                          if (isAuthenticated) {
+                            navigate("/shop");
+                          } else {
+                            navigate("/login");
+                          }
+                        }}
+                        className="w-full bg-white text-[#991B1B] font-bold py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-[#FFD4A3] transition"
+                      >
                         View Details
                         <ArrowRight size={20} />
                       </button>
@@ -91,7 +113,10 @@ export default function CollectionSection() {
 
         {/* CTA */}
         <div className="mt-16 text-center" data-aos="fade-up">
-          <button className="px-10 py-4 bg-[#991B1B] text-white font-bold rounded-lg hover:bg-[#7A0F0F] transition duration-300 shadow-xl flex items-center gap-2 mx-auto">
+          <button 
+            onClick={handleExploreCollection}
+            className="px-10 py-4 bg-[#991B1B] text-white font-bold rounded-lg hover:bg-[#7A0F0F] transition duration-300 shadow-xl flex items-center gap-2 mx-auto"
+          >
             Explore Full Collection
             <ArrowRight size={20} />
           </button>

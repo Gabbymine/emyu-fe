@@ -11,7 +11,7 @@ export const adminProductService = {
     name: string;
     description: string;
     price: number;
-    category_id: string;
+    category_id?: string;
     is_customizable: boolean;
   }) {
     const response = await api.post("/admin/products", data);

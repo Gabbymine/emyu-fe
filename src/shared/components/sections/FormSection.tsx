@@ -32,7 +32,7 @@ export default function FormSection() {
   };
 
   return (
-    <section id="contact" className="w-full opacity-0 animate-fade-in" style={{ animationDelay: '500ms' }}>
+    <section id="form" className="w-full opacity-0 animate-fade-in" style={{ animationDelay: '500ms' }}>
       {/* Main Contact Form Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-0 items-center py-16 md:py-0 bg-[##991B1B] text-white">
         {/* LEFT SIDE - IMAGE */}

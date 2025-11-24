@@ -1,9 +1,14 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { ChevronRight } from "lucide-react";
+import { useAuthStore } from "../../../store/authStore";
 
 export default function HeroSection() {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
+
   useEffect(() => {
     AOS.init({
       duration: 1000,
@@ -11,6 +16,21 @@ export default function HeroSection() {
       delay: 100,
     });
   }, []);
+
+  const handleShopNow = () => {
+    if (isAuthenticated) {
+      navigate("/shop");
+    } else {
+      navigate("/login");
+    }
+  };
+
+  const handleSeeCollection = () => {
+    const element = document.getElementById("product");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   return (
     <section className="w-full px-6 md:px-12 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-center min-h-screen relative overflow-hidden opacity-0 animate-fade-in" style={{ animationDelay: '0ms' }}>
@@ -56,11 +76,17 @@ export default function HeroSection() {
           data-aos="fade-up"
           data-aos-delay="400"
         >
-          <button className="group px-8 py-4 bg-[#FFF9F3] text-[#991B1B] font-bold rounded-lg hover:bg-[#FFD4A3] transition duration-300 shadow-2xl flex items-center gap-2">
+          <button 
+            onClick={handleShopNow}
+            className="group px-8 py-4 bg-[#FFF9F3] text-[#991B1B] font-bold rounded-lg hover:bg-[#FFD4A3] transition duration-300 shadow-2xl flex items-center gap-2"
+          >
             Shop Now
             <ChevronRight size={20} className="group-hover:translate-x-1 transition" />
           </button>
-          <button className="px-8 py-4 border-2 border-[#FFF9F3] text-[#FFF9F3] font-bold rounded-lg hover:bg-white/10 transition duration-300 backdrop-blur-sm">
+          <button 
+            onClick={handleSeeCollection}
+            className="px-8 py-4 border-2 border-[#FFF9F3] text-[#FFF9F3] font-bold rounded-lg hover:bg-white/10 transition duration-300 backdrop-blur-sm"
+          >
             See Collection
           </button>
         </div>
