@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../../store/authStore";
+import { useToastContext } from "../../../context/useToast";
 import { Mail, Lock, Eye, EyeOff, User, Phone } from "lucide-react";
 
 export default function AuthPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, register, isLoading, error, clearError } = useAuthStore();
+  const { showToast } = useToastContext();
   
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -33,10 +35,21 @@ export default function AuthPage() {
 
     try {
       await login(formData.email, formData.password);
-      const from = (location.state as any)?.from?.pathname || "/shop";
-      navigate(from);
+      showToast("Login berhasil!", "success");
+      
+      // Get updated user data from store after login
+      const { user } = useAuthStore.getState();
+      
+      // Redirect based on role
+      if (user?.role_id === 1) {
+        navigate("/admin");
+      } else {
+        const locationState = location.state as { from?: { pathname: string } } | null;
+        const from = locationState?.from?.pathname || "/shop";
+        navigate(from);
+      }
     } catch {
-      // Error is handled by the store
+      showToast("Login gagal. Silakan cek email dan password Anda.", "error");
     }
   };
 
@@ -46,12 +59,14 @@ export default function AuthPage() {
     setValidationError("");
 
     if (formData.password !== formData.confirmPassword) {
-      setValidationError("Passwords do not match");
+      setValidationError("Password tidak cocok");
+      showToast("Password tidak cocok", "error");
       return;
     }
 
     if (formData.password.length < 6) {
-      setValidationError("Password must be at least 6 characters");
+      setValidationError("Password minimal 6 karakter");
+      showToast("Password minimal 6 karakter", "error");
       return;
     }
 
@@ -62,9 +77,17 @@ export default function AuthPage() {
         formData.password,
         formData.phone
       );
-      navigate("/shop");
+      showToast("Registrasi berhasil! Silakan login.", "success");
+      setIsLogin(true);
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        password: "",
+        confirmPassword: "",
+      });
     } catch {
-      // Error is handled by the store
+      showToast("Registrasi gagal. Silakan coba lagi.", "error");
     }
   };
 

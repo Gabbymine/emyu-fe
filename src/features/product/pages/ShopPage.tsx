@@ -5,12 +5,14 @@ import productService from "../../../services/productService";
 import type { Product } from "../../../services/productService";
 import { useAuthStore } from "../../../store/authStore";
 import { useCartStore } from "../../../store/cartStore";
+import { useToastContext } from "../../../context/useToast";
 import Navbar from "../../../layout/Navbar";
 
 export default function ShopPage() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
   const { addItem, items: cartItems } = useCartStore();
+  const { showToast } = useToastContext();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,9 +79,11 @@ export default function ShopPage() {
     try {
       await addItem(product.id, product.name, product.price, 1);
       setAddedToCart(product.id);
+      showToast(`${product.name} ditambahkan ke keranjang`, "success");
       setTimeout(() => setAddedToCart(null), 2000);
     } catch (error) {
       console.error("Failed to add to cart:", error);
+      showToast("Gagal menambahkan ke keranjang", "error");
     }
   };
 
@@ -271,7 +275,10 @@ export default function ShopPage() {
                       </span>
                     </div>
 
-                    <h3 className="text-lg font-bold mb-3 line-clamp-2 group-hover:text-[#991B1B] transition duration-300 text-gray-900">
+                    <h3 
+                      onClick={() => navigate(`/product/${product.id}`)}
+                      className="text-lg font-bold mb-3 line-clamp-2 group-hover:text-[#991B1B] transition duration-300 text-gray-900 cursor-pointer hover:underline"
+                    >
                       {product.name}
                     </h3>
 

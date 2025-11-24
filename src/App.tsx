@@ -3,18 +3,27 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate,
 } from "react-router-dom";
 import { useAuthStore } from "./store/authStore";
 import { useCartStore } from "./store/cartStore";
+import { ToastProvider } from "./context/ToastContext";
 import Navbar from "./layout/Navbar";
 import Footer from "./layout/Footer";
 import LandingPage from "./pages/LandingPage";
 import ShopPage from "./features/product/pages/ShopPage";
+import ProductDetailPage from "./features/product/pages/ProductDetailPage";
+import WishlistPage from "./features/product/pages/WishlistPage";
 import CartPage from "./features/cart/pages/CartPage";
 import CheckoutPage from "./features/order/pages/CheckoutPage";
-import ProtectedRoute from "./components/ProtectedRoute";
+import OrderHistoryPage from "./features/order/pages/OrderHistoryPage";
+import UserProfilePage from "./features/user/pages/UserProfilePage";
+import NotFoundPage from "./pages/errors/NotFoundPage";
+import { ProtectedRoute, AdminProtectedRoute } from "./components/ProtectedRoute";
 import AuthPage from "./features/auth/pages/AuthPage";
+import AdminDashboard from "./features/admin/pages/AdminDashboard";
+import AdminProducts from "./features/admin/pages/AdminProducts";
+import AdminOrders from "./features/admin/pages/AdminOrders";
+import AdminUsers from "./features/admin/pages/AdminUsers";
 
 function AppContent() {
   return (
@@ -44,6 +53,22 @@ function AppContent() {
         }
       />
       <Route
+        path="/product/:id"
+        element={
+          <ProtectedRoute>
+            <ProductDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/wishlist"
+        element={
+          <ProtectedRoute>
+            <WishlistPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/cart"
         element={
           <ProtectedRoute>
@@ -59,9 +84,60 @@ function AppContent() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/orders"
+        element={
+          <ProtectedRoute>
+            <OrderHistoryPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <UserProfilePage />
+          </ProtectedRoute>
+        }
+      />
 
-      {/* Catch all */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Admin Routes */}
+      <Route
+        path="/admin"
+        element={
+          <AdminProtectedRoute>
+            <AdminDashboard />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/products"
+        element={
+          <AdminProtectedRoute>
+            <AdminProducts />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/orders"
+        element={
+          <AdminProtectedRoute>
+            <AdminOrders />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <AdminProtectedRoute>
+            <AdminUsers />
+          </AdminProtectedRoute>
+        }
+      />
+
+      {/* Error Routes */}
+      <Route path="/not-found" element={<NotFoundPage />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }
@@ -71,14 +147,19 @@ function App() {
   const fetchCart = useCartStore((state) => state.fetchCart);
 
   useEffect(() => {
-    loadAuth();
-    fetchCart();
+    const initializeApp = async () => {
+      await loadAuth();
+      await fetchCart();
+    };
+    initializeApp();
   }, [loadAuth, fetchCart]);
 
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <ToastProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </ToastProvider>
   );
 }
 

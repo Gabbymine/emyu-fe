@@ -4,7 +4,6 @@ import { Trash2, Minus, Plus, ArrowLeft, ShoppingBag } from "lucide-react";
 import { useAuthStore } from "../../../store/authStore";
 import { useCartStore } from "../../../store/cartStore";
 import Navbar from "../../../layout/Navbar";
-import Footer from "../../../layout/Footer";
 
 export default function CartPage() {
   const navigate = useNavigate();

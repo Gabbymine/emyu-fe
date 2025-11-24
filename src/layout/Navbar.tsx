@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import { Menu, X, ShoppingBag, LogOut, ChevronDown, User } from "lucide-react";
+import { Menu, X, ShoppingBag, LogOut, ChevronDown, User, Package, Heart } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { useCartStore } from "../store/cartStore";
 
@@ -113,6 +113,13 @@ export default function Navbar() {
       {/* Desktop CTA */}
       <div className="hidden md:flex items-center gap-3">
         <button 
+          onClick={() => navigate("/wishlist")}
+          className="p-2 bg-white/10 hover:bg-[#FFD4A3]/20 rounded-lg transition duration-200 group hover:scale-110"
+        >
+          <Heart size={18} className="text-[#FFD4A3] group-hover:text-[#FFF9F3] transition" />
+        </button>
+        
+        <button 
           onClick={() => navigate("/cart")}
           className="p-2 bg-white/10 hover:bg-[#FFD4A3]/20 rounded-lg transition duration-200 relative group hover:scale-110"
         >
@@ -154,6 +161,17 @@ export default function Navbar() {
                 >
                   <User size={16} />
                   My Profile
+                </button>
+
+                <button
+                  onClick={() => {
+                    navigate("/orders");
+                    setProfileOpen(false);
+                  }}
+                  className="w-full px-4 py-2 text-left text-gray-800 hover:bg-[#991B1B] hover:text-white transition flex items-center gap-2 text-sm"
+                >
+                  <Package size={16} />
+                  My Orders
                 </button>
                 
                 <button

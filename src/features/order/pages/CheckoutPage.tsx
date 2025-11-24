@@ -3,24 +3,31 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import { useAuthStore } from "../../../store/authStore";
 import { useCartStore } from "../../../store/cartStore";
+import { orderService } from "../services/orderService";
+import { shippingAddressService } from "../../user/services/shippingAddressService";
+import type { ShippingAddress } from "../../user/services/shippingAddressService";
 import Navbar from "../../../layout/Navbar";
 import Footer from "../../../layout/Footer";
+import { useToastContext } from "@/context/useToast";
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
   const { items, total, clearCart } = useCartStore();
+  const { showToast } = useToastContext();
+
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [addresses, setAddresses] = useState<ShippingAddress[]>([]);
+
   const [formData, setFormData] = useState({
-    email: user?.email || "",
     phone: user?.phone || "",
-    address: "",
-    city: "",
-    postalCode: "",
     paymentMethod: "bank_transfer",
+    shippingAddressId: "",
   });
 
+  // Fetch shipping addresses on mount
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login");
@@ -31,7 +38,26 @@ export default function CheckoutPage() {
       navigate("/cart");
       return;
     }
+
+    loadShippingAddresses();
   }, [isAuthenticated, items.length, orderPlaced, navigate]);
+
+  const loadShippingAddresses = async () => {
+    try {
+      const data = await shippingAddressService.getUserAddresses();
+      const addressList = Array.isArray(data) ? data : [];
+      setAddresses(addressList);
+      if (addressList.length > 0) {
+        setFormData((prev) => ({
+          ...prev,
+          shippingAddressId: addressList[0].id,
+        }));
+      }
+    } catch (err) {
+      console.error("Failed to load addresses:", err);
+      setError("Failed to load shipping addresses");
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -40,23 +66,49 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
+    if (!formData.shippingAddressId) {
+      setError("Please select a shipping address");
+      showToast("Please select a shipping address", "error");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // Simulate order placement
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      
-      // Clear cart and show success
+      const shippingCost = 25000;
+      const subtotal = total;
+      const tax = Math.ceil(subtotal * 0.1);
+      const totalWithTax = subtotal + tax + shippingCost;
+
+      // Prepare order items
+      const orderItems = items.map((item) => ({
+        product_variant_id: item.id || item.product_id,
+        quantity: item.quantity,
+        price: item.price,
+      }));
+
+      await orderService.createOrder({
+        total_amount: totalWithTax,
+        shipping_cost: shippingCost,
+        payment_method: formData.paymentMethod,
+        shipping_address_id: formData.shippingAddressId,
+        items: orderItems,
+      });
+
       clearCart();
       setOrderPlaced(true);
-      
-      // Show success for 3 seconds then redirect
+      showToast("Order placed successfully!", "success");
+
       setTimeout(() => {
-        navigate("/shop");
+        navigate("/orders");
       }, 3000);
-    } catch (error) {
-      console.error("Failed to place order:", error);
-      alert("Failed to place order. Please try again.");
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to place order";
+      setError(errorMessage);
+      showToast(errorMessage, "error");
+      console.error("Failed to place order:", err);
     } finally {
       setLoading(false);
     }
@@ -75,12 +127,12 @@ export default function CheckoutPage() {
             <p className="text-gray-600 mb-6 max-w-md text-sm leading-relaxed">
               Thank you for your purchase. Your order has been confirmed and will be processed shortly.
             </p>
-            <p className="text-xs text-gray-400 mb-6 animate-bounce">Redirecting to shop...</p>
+            <p className="text-xs text-gray-400 mb-6 animate-bounce">Redirecting to order history...</p>
             <button
-              onClick={() => navigate("/shop")}
+              onClick={() => navigate("/orders")}
               className="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition duration-300 inline-block hover:scale-105 shadow-lg text-sm"
             >
-              Continue Shopping
+              View Order History
             </button>
           </div>
         </main>
@@ -113,85 +165,48 @@ export default function CheckoutPage() {
             {/* Checkout Form */}
             <div className="lg:col-span-2">
               <form onSubmit={handleSubmit} className="space-y-5">
-                {/* Shipping Information */}
-                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200 p-7">
-                  <h2 className="text-xl font-black mb-6 text-gray-900">Shipping <span className="text-[#991B1B]">Information</span></h2>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-bold text-gray-900 mb-2">
-                        Email Address
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#991B1B]/70 focus:border-[#991B1B] transition text-sm"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-bold text-gray-900 mb-2">
-                        Phone Number
-                      </label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#991B1B]/70 focus:border-[#991B1B] transition text-sm"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-bold text-gray-900 mb-2">
-                        Shipping Address
-                      </label>
-                      <input
-                        type="text"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleChange}
-                        required
-                        placeholder="Street address"
-                        className="w-full px-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#991B1B]/70 focus:border-[#991B1B] transition text-sm"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-bold text-gray-900 mb-2">
-                          City
-                        </label>
-                        <input
-                          type="text"
-                          name="city"
-                          value={formData.city}
-                          onChange={handleChange}
-                          required
-                          placeholder="City"
-                          className="w-full px-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#991B1B]/70 focus:border-[#991B1B] transition text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-bold text-gray-900 mb-2">
-                          Postal Code
-                        </label>
-                        <input
-                          type="text"
-                          name="postalCode"
-                          value={formData.postalCode}
-                          onChange={handleChange}
-                          required
-                          placeholder="Postal code"
-                          className="w-full px-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#991B1B]/70 focus:border-[#991B1B] transition text-sm"
-                        />
-                      </div>
-                    </div>
+                {error && (
+                  <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 text-red-700 text-sm">
+                    {error}
                   </div>
+                )}
+
+                {/* Shipping Address */}
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200 p-7">
+                  <h2 className="text-xl font-black mb-6 text-gray-900">Shipping <span className="text-[#991B1B]">Address</span></h2>
+
+                  {addresses.length === 0 ? (
+                    <div className="text-center py-4 text-gray-600">
+                      <p className="mb-3">No shipping addresses found. Please create one in your profile.</p>
+                      <button
+                        type="button"
+                        onClick={() => navigate("/profile")}
+                        className="px-4 py-2 bg-[#991B1B] text-white rounded-lg hover:bg-[#7A0F0F] transition text-sm"
+                      >
+                        Go to Profile
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {addresses.map((addr) => (
+                        <label key={addr.id} className="flex items-start gap-3 cursor-pointer p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-[#991B1B] transition">
+                          <input
+                            type="radio"
+                            name="shippingAddressId"
+                            value={addr.id}
+                            checked={formData.shippingAddressId === addr.id}
+                            onChange={handleChange}
+                            className="w-5 h-5 accent-[#991B1B] mt-1"
+                          />
+                          <div className="flex-1">
+                            <p className="font-bold text-gray-900 text-sm">{addr.address}</p>
+                            <p className="text-gray-600 text-xs">{addr.city}, {addr.province} {addr.postal_code}</p>
+                            <p className="text-gray-600 text-xs">Phone: {addr.phone}</p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Payment Method */}
@@ -222,7 +237,7 @@ export default function CheckoutPage() {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || addresses.length === 0}
                   className="w-full px-4 py-3.5 bg-[#991B1B] text-white font-bold rounded-lg hover:bg-[#7A0F0F] transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-lg hover:shadow-xl hover:scale-105"
                 >
                   {loading ? "⏳ Processing Order..." : "✓ Place Order"}
@@ -257,7 +272,7 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600 font-semibold">Shipping</span>
-                    <span className="font-bold text-green-600">Free</span>
+                    <span className="font-bold text-green-600">Rp 25.000</span>
                   </div>
                   <div className="flex justify-between pb-4 border-b-2 border-gray-200">
                     <span className="text-gray-600 font-semibold">Tax (10%)</span>
@@ -266,7 +281,7 @@ export default function CheckoutPage() {
                   <div className="flex justify-between bg-[#991B1B]/5 p-4 rounded-lg border-2 border-[#991B1B]/20">
                     <span className="font-bold text-gray-900">Total</span>
                     <span className="text-2xl font-black text-[#991B1B]">
-                      Rp {Math.round(total * 1.1).toLocaleString("id-ID")}
+                      Rp {Math.round(total * 1.1 + 25000).toLocaleString("id-ID")}
                     </span>
                   </div>
                 </div>
@@ -275,6 +290,7 @@ export default function CheckoutPage() {
           </div>
         </div>
       </main>
+      <Footer />
     </>
   );
 }
